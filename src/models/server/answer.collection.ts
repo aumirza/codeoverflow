@@ -13,7 +13,6 @@ export default async function createAnswerCollection() {
   console.log("Answer collection created");
 
   await Promise.all([
-    database.createStringAttribute(db, answerCollection, "title", 100, true),
     database.createStringAttribute(
       db,
       answerCollection,
