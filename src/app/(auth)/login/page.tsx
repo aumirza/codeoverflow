@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -16,7 +15,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/Auth";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().min(2, {
@@ -33,10 +33,12 @@ const keys = Object.keys(formSchema.shape) as Array<
 
 function LoginPage() {
   const { login } = useAuthStore();
+  const router = useRouter();
 
   const { mutate: handleLogin } = useMutation({
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       login(email, password),
+    mutationKey: ["login"],
     onError(error, variables, context) {
       setError("root", {
         type: "custom",
@@ -45,6 +47,7 @@ function LoginPage() {
     },
     onSuccess(data, variables, context) {
       console.log(data);
+      router.replace("/");
     },
   });
 
