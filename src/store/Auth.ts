@@ -3,10 +3,7 @@ import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 import { account } from "@/models/client";
 import { Models, ID, AppwriteException } from "appwrite";
-
-export interface IUserPrefs {
-  reputation: number;
-}
+import { IUserPrefs } from "@/types/user";
 
 interface IState {
   session: Models.Session | null;
@@ -68,7 +65,7 @@ export const useAuthStore = create<IState & IAction>()(
             account.createJWT(),
           ]);
           set({ session, user, jwt });
-          return { success: true };
+          return { success: true, user };
         } catch (error) {
           return Promise.reject({
             success: false,
