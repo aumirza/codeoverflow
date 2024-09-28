@@ -7,8 +7,8 @@ const client = new Client()
   .setKey(appwrite_key); // Your secret API key
 
 const avatars = new Avatars(client);
-const database = new Databases(client);
+const databases = new Databases(client);
 const storage = new Storage(client);
 const users = new Users(client);
 
-export { avatars, database, storage, users };
+export { avatars, databases, storage, users };

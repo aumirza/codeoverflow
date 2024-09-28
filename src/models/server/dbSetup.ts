@@ -1,5 +1,5 @@
 import { db } from "@/config/db";
-import { database } from "./config";
+import { databases } from "./config";
 import createQuestionCollection from "./question.collection";
 import createAnswerCollection from "./answer.collection";
 import createVoteCollection from "./vote.collection";
@@ -7,11 +7,11 @@ import createCommentCollection from "./comment.collection";
 
 export default async function getOrCreateDB() {
   try {
-    await database.get(db);
+    await databases.get(db);
     console.log("Database connection");
   } catch (error) {
     try {
-      await database.create(db, db);
+      await databases.create(db, db);
       console.log("Database Created");
 
       await Promise.all([
@@ -30,5 +30,5 @@ export default async function getOrCreateDB() {
       );
     }
   }
-  return database;
+  return databases;
 }

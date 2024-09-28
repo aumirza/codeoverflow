@@ -1,9 +1,9 @@
 import { IndexType, Permission } from "node-appwrite";
 import { db, questionCollection } from "@/config/db";
-import { database } from "./config";
+import { databases } from "./config";
 
 export default async function createQuestionCollection() {
-  await database.createCollection(db, questionCollection, questionCollection, [
+  await databases.createCollection(db, questionCollection, questionCollection, [
     Permission.read("any"),
     Permission.read("users"),
     Permission.create("users"),
@@ -13,15 +13,15 @@ export default async function createQuestionCollection() {
   console.log("Question collection created");
 
   await Promise.all([
-    database.createStringAttribute(db, questionCollection, "title", 100, true),
-    database.createStringAttribute(
+    databases.createStringAttribute(db, questionCollection, "title", 100, true),
+    databases.createStringAttribute(
       db,
       questionCollection,
       "content",
       10000,
       true
     ),
-    database.createStringAttribute(
+    databases.createStringAttribute(
       db,
       questionCollection,
       "tags",
@@ -30,14 +30,14 @@ export default async function createQuestionCollection() {
       undefined,
       true
     ),
-    database.createStringAttribute(
+    databases.createStringAttribute(
       db,
       questionCollection,
       "authorId",
       50,
       true
     ),
-    database.createStringAttribute(
+    databases.createStringAttribute(
       db,
       questionCollection,
       "attachmentId",
@@ -50,7 +50,7 @@ export default async function createQuestionCollection() {
   //   create Index
 
   await Promise.all([
-    database.createIndex(
+    databases.createIndex(
       db,
       questionCollection,
       "title",
@@ -58,7 +58,7 @@ export default async function createQuestionCollection() {
       ["title"],
       ["asc"]
     ),
-    database.createIndex(
+    databases.createIndex(
       db,
       questionCollection,
       "content",

@@ -1,10 +1,10 @@
 import { voteCollection, db } from "@/config/db";
-import { database } from "./config";
+import { databases } from "./config";
 import { Permission } from "node-appwrite";
 
 export default async function createVoteCollection() {
   //
-  await database.createCollection(db, voteCollection, voteCollection, [
+  await databases.createCollection(db, voteCollection, voteCollection, [
     Permission.read("any"),
     Permission.read("users"),
     Permission.create("users"),
@@ -15,16 +15,16 @@ export default async function createVoteCollection() {
   console.log("Comment collection created");
 
   await Promise.all([
-    database.createEnumAttribute(
+    databases.createEnumAttribute(
       db,
       voteCollection,
       "type",
       ["question", "answer"],
       true
     ),
-    database.createStringAttribute(db, voteCollection, "typeId", 50, true),
-    database.createStringAttribute(db, voteCollection, "votedById", 50, true),
-    database.createEnumAttribute(
+    databases.createStringAttribute(db, voteCollection, "typeId", 50, true),
+    databases.createStringAttribute(db, voteCollection, "votedById", 50, true),
+    databases.createEnumAttribute(
       db,
       voteCollection,
       "voteStatus",
