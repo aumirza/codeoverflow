@@ -1,6 +1,6 @@
 import React, { FC } from "react";
 import { BeamCard } from "./magicui/beam-card";
-import MDEditor, { ICommand } from "@uiw/react-md-editor";
+import MDEditor from "@uiw/react-md-editor";
 import {
   FormControl,
   FormField,
@@ -24,7 +24,7 @@ const MarkdownEditor: FC<IProps> = ({ control }) => {
     setWords(wordCount);
   };
   return (
-    <BeamCard data-color-mode="light" duration={16}>
+    <BeamCard duration={16}>
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
           <span>Content</span>

@@ -106,13 +106,17 @@ const NavButton = ({}) => {
   );
 };
 
-export const Header = () => {
+const Header = () => {
   return (
     <div className="flex justify-center py-5">
       <div className="flex justify-between w-11/12">
-        <SparklesText className="text-3xl" text="Codeoverflow" />
+        <Link href="/">
+          <SparklesText className="text-3xl" text="Codeoverflow" />
+        </Link>
         <Nav />
       </div>
     </div>
   );
 };
+
+export default Header;

@@ -1,4 +1,4 @@
-import { QuestionEditor } from "@/components/question-editor";
+import QuestionEditor from "@/components/QuestionEditor";
 import React from "react";
 
 const AddQuestion = () => {

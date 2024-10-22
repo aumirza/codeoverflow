@@ -9,49 +9,14 @@ import { ImageInput } from "./ImageInput";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  // FormDescription,
-  // FormLabel,
-} from "./ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { countWordsInMarkdown } from "@/utils/markdown";
 import MarkdownEditor from "./MarkdownEditor";
-import { databases, storage } from "@/models/client";
-import { db, questionAttachmentsBucket, questionCollection } from "@/config/db";
-import { ID } from "appwrite";
 import { useAuthStore } from "@/store/Auth";
 import { useMutation } from "@tanstack/react-query";
+import { useDb } from "@/hooks/usedb";
 
-async function createQuestion(
-  title: string,
-  content: string,
-  authorId: string,
-  tags: string,
-  file: File
-) {
-  const storageRes = await storage.createFile(
-    questionAttachmentsBucket,
-    ID.unique(),
-    file
-  );
-
-  const res = databases.createDocument(db, questionCollection, ID.unique(), {
-    title: "",
-    content: "",
-    tags: tags,
-    attachmentId: storageRes.$id,
-    authorId: authorId,
-  });
-
-  return res;
-}
-
-export const QuestionEditor = () => {
-  // const [tags, setTags] = React.useState<Tag[]>([]);
+const QuestionEditor = () => {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const questionSchema = z.object({
@@ -74,6 +39,8 @@ export const QuestionEditor = () => {
       })
     ),
   });
+
+  const { createQuestion } = useDb();
 
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
@@ -98,12 +65,12 @@ export const QuestionEditor = () => {
       title: string;
       content: string;
       authorId: string;
-      tags: string;
+      tags: string[];
       file: File;
     }) => createQuestion(title, content, authorId, tags, file),
     mutationKey: ["addQuestion"],
     onSuccess: () => {
-      form.reset();
+      console.log("success");
     },
     onError: (error) => {
       setError("root", {
@@ -125,17 +92,17 @@ export const QuestionEditor = () => {
   const onSubmit: SubmitHandler<z.infer<typeof questionSchema>> = (values) => {
     const file = values.attachment[0].file;
     const { title, content } = values;
-    const tags = values.tags.map((tag) => tag.text).join(",");
+    const tags = values.tags.map((tag) => tag.text);
     if (!user?.$id) return;
     const authorId = user?.$id;
     addQuestion({ title, content, authorId, tags, file });
   };
 
   return (
-    <div className="w-11/12">
+    <div>
       <Form {...form}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <div className="flex flex-col gap-5 max-w-screen-md">
+          <div className="flex flex-col gap-5">
             <div className="">
               <span className="text-3xl font-semibold">Add Question</span>
             </div>
@@ -208,6 +175,9 @@ export const QuestionEditor = () => {
                 )}
               />
             </BeamCard>
+            {errors.root ? (
+              <span className="text-red-100">{errors.root.message}</span>
+            ) : null}
             <div className="">
               <ShimmerButton>Submit</ShimmerButton>
             </div>
@@ -217,3 +187,5 @@ export const QuestionEditor = () => {
     </div>
   );
 };
+
+export default QuestionEditor;
