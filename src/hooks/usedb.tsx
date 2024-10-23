@@ -5,38 +5,16 @@ import {
   questionCollection,
   voteCollection,
 } from "@/config/db";
-import { ID, Models, Query } from "appwrite";
+import { ID, Query } from "appwrite";
+import { IAnswer, IComment, IQuestion, IVote } from "@/types/models";
 
-interface IComment extends Models.Document {
-  content: string;
-  type: string;
-  typeId: string;
-  authorId: string;
-}
-
-interface IVote extends Models.Document {
-  type: string;
-  typeId: string;
-  votedById: string;
-  voteStatus: number;
-}
-
-interface IQuestion extends Models.Document {
-  title: string;
-  content: string;
-  tags: string[];
-  authorId: string;
-  attachmentId: string;
-  answers: Models.DocumentList<IAnswer>;
-}
-
-interface IAnswer extends Models.Document {
-  content: string;
-  questionId: string;
-  authorId: string;
-}
-
-export const useDb = () => ({ createQuestion, getQuestions, getQuestion });
+export const useDb = () => ({
+  createQuestion,
+  getQuestions,
+  getQuestion,
+  addNewComment,
+  createAnswer,
+});
 
 const fetchUserDetails = async (userId: string) => {
   try {
@@ -58,10 +36,12 @@ async function getAnswers(QuestionId: string) {
       answers.documents.map(async (answer) => {
         const user = await fetchUserDetails(answer.authorId);
         const comments = await getComments("answer", answer.$id);
+        const votes = await getVotes("answer", answer.$id);
         return {
           ...answer,
           author: user,
           comments: comments,
+          votes: votes,
         };
       })
     );
@@ -80,10 +60,10 @@ async function getComments(type: string, typeId: string) {
     ]);
     comments.documents = await Promise.all(
       comments.documents.map(async (comment) => {
-        const user = await fetchUserDetails(comment.authorId);
+        const author = await fetchUserDetails(comment.authorId);
         return {
           ...comment,
-          author: user,
+          author: author,
         };
       })
     );
@@ -91,6 +71,31 @@ async function getComments(type: string, typeId: string) {
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
+  }
+}
+
+async function addNewComment(
+  content: string,
+  type: string,
+  typeId: string,
+  authorId: string
+) {
+  try {
+    const newComment = await databases.createDocument<IComment>(
+      db,
+      "comments",
+      ID.unique(),
+      {
+        content: content,
+        type: type,
+        typeId: typeId,
+        authorId: authorId,
+      }
+    );
+    return newComment;
+  } catch (error) {
+    return Promise.reject(error);
+    console.error(error);
   }
 }
 
@@ -220,6 +225,29 @@ async function createQuestion(
     );
     return question;
   } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function createAnswer(
+  content: string,
+  authorId: string,
+  questionId: string
+) {
+  try {
+    const res = await fetch("/api/answer", {
+      method: "Post",
+      body: JSON.stringify({
+        content: content,
+        authorId: authorId,
+        questionId: questionId,
+      }),
+    });
+    const answer = await res.json();
+    return answer.data;
+  } catch (error) {
+    // handle request error
     console.error(error);
     return Promise.reject(error);
   }

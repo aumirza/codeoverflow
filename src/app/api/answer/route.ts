@@ -6,14 +6,14 @@ import { ID } from "node-appwrite";
 
 export async function POST(request: NextRequest) {
   try {
-    const { questionId, authorId, answer } = await request.json();
+    const { questionId, authorId, content } = await request.json();
 
-    const res = await databases.createDocument(
+    const answer = await databases.createDocument(
       db,
       answerCollection,
       ID.unique(),
       {
-        content: answer,
+        content: content,
         authorId,
         questionId,
       }
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       reputation: userPrefs.reputation + 1,
     });
 
-    return NextResponse.json({ data: res }, { status: 201 });
+    return NextResponse.json({ data: answer }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json(
       {
