@@ -3,7 +3,7 @@
 import { useDb } from "@/hooks/usedb";
 import { timeAgo } from "@/utils/time-ago";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useEffect } from "react";
 import { BeamCard } from "./magicui/beam-card";
 import Link from "next/link";
 import { slugify } from "@/utils/slugify";
@@ -27,7 +27,7 @@ const QuestionList = () => {
             href={`/question/${question.$id}/${slugify(question.title)}`}
             key={question.$id}
           >
-            <BeamCard wrapperClassName="w-full p-3">
+            <BeamCard beamSize={120} wrapperClassName="w-full p-3">
               <div className="flex gap-2">
                 <div className="flex flex-col text-sm">
                   <span>{question.totalVotes} Votes</span>
@@ -38,12 +38,15 @@ const QuestionList = () => {
                   <div className="flex justify-between text-sm">
                     <div className="flex gap-1">
                       {question.tags.map((tag) => (
-                        <span className="italic bg-gray-300 py-0.5 px-2 rounded-md">
+                        <span
+                          key={tag}
+                          className="italic bg-gray-300 py-0.5 px-2 rounded-md"
+                        >
                           #{tag}
                         </span>
                       ))}
                     </div>
-                    <div className="">
+                    <div className="flex items-center gap-1">
                       {/* profile pic */}
                       <img
                         className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
@@ -51,7 +54,7 @@ const QuestionList = () => {
                         alt=""
                       />
                       <span>{question.author?.name}</span>
-                      <span>&nbsp; asked &nbsp;</span>
+                      <span>&nbsp;asked&nbsp;</span>
                       <span>{timeAgo(question.$createdAt)}</span>
                     </div>
                   </div>
