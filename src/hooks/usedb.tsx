@@ -7,6 +7,7 @@ import {
 } from "@/config/db";
 import { ID, Query } from "appwrite";
 import { IAnswer, IComment, IQuestion, IVote } from "@/types/models";
+import { toast } from "sonner";
 
 export const useDb = () => ({
   createQuestion,
@@ -14,6 +15,8 @@ export const useDb = () => ({
   getQuestion,
   addNewComment,
   createAnswer,
+  createOrUpdateVote,
+  isVotedByOnType,
 });
 
 const fetchUserDetails = async (userId: string) => {
@@ -94,19 +97,32 @@ async function addNewComment(
     );
     return newComment;
   } catch (error) {
-    return Promise.reject(error);
     console.error(error);
+    return Promise.reject(error);
   }
 }
 
 async function getVotes(type: string, typeId: string) {
   try {
-    const votes = await databases.listDocuments<IVote>(db, voteCollection, [
-      Query.equal("type", type), // Filter by type
+    const upvotes = await databases.listDocuments<IVote>(db, voteCollection, [
+      Query.equal("type", type),
       Query.equal("typeId", typeId),
-      // Query.limit(1),
+      Query.equal("voteStatus", "up"),
+      Query.limit(1),
     ]);
-    return votes;
+
+    const downvotes = await databases.listDocuments<IVote>(db, voteCollection, [
+      Query.equal("type", type),
+      Query.equal("typeId", typeId),
+      Query.equal("voteStatus", "down"),
+      Query.limit(1),
+    ]);
+    return {
+      upvotes: upvotes.total,
+      downvotes: downvotes.total,
+      total: upvotes.total + downvotes.total,
+      net: upvotes.total - downvotes.total,
+    };
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -194,7 +210,6 @@ async function getAttachment(attachmentId: string) {
       questionAttachmentsBucket,
       attachmentId
     );
-    console.log(file);
     return file;
   } catch (error) {
     console.error(error);
@@ -248,6 +263,56 @@ async function createAnswer(
     return answer.data;
   } catch (error) {
     // handle request error
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function createOrUpdateVote(
+  voteStatus: "up" | "down",
+  type: "question" | "answer",
+  typeId: string,
+  votedById: string
+) {
+  try {
+    const res = await fetch("/api/vote", {
+      method: "Post",
+      body: JSON.stringify({
+        voteStatus: voteStatus,
+        type: type,
+        typeId: typeId,
+        votedById: votedById,
+      }),
+    });
+    const vote_json = await res.json();
+    if (!vote_json.success) throw new Error(vote_json.message);
+    return vote_json;
+  } catch (error) {
+    // handle request error
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function isVotedByOnType(
+  type: string,
+  typeId: string,
+  votedById: string
+) {
+  try {
+    const res = await databases.listDocuments<IVote>(db, voteCollection, [
+      Query.equal("type", type),
+      Query.equal("typeId", typeId),
+      Query.equal("votedById", votedById),
+      Query.limit(1),
+    ]);
+    return {
+      isVoted: res.documents.length > 0,
+      vote: res.documents[0],
+      isUpvote: res.documents[0]?.voteStatus === "up",
+      isDownvote: res.documents[0]?.voteStatus === "down",
+    };
+  } catch (error) {
     console.error(error);
     return Promise.reject(error);
   }

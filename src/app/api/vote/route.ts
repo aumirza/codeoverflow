@@ -51,22 +51,28 @@ export async function POST(req: NextRequest) {
     }
 
     // get total vote count and group by voteStatus [upvotes,downvotes]
-    const totalVote = await databases.listDocuments(db, voteCollection, [
+    const upvotes = await databases.listDocuments(db, voteCollection, [
       Query.equal("type", type),
       Query.equal("typeId", typeId),
+      Query.equal("voteStatus", "up"),
+      Query.limit(1),
     ]);
 
-    const votesResult = {
-      upvotes: totalVote.documents.filter((vote) => vote.voteStatus === "up")
-        .length,
-      downvotes: totalVote.documents.filter(
-        (vote) => vote.voteStatus === "down"
-      ).length,
-    };
+    const downvotes = await databases.listDocuments(db, voteCollection, [
+      Query.equal("type", type),
+      Query.equal("typeId", typeId),
+      Query.equal("voteStatus", "down"),
+      Query.limit(1),
+    ]);
 
     return NextResponse.json({
+      success: true,
       message: "Vote successful",
-      data: votesResult,
+      data: {
+        upvotes: upvotes.total,
+        downvotes: downvotes.total,
+        netCount: upvotes.total - downvotes.total,
+      },
       status: 200,
     });
   } catch (err: any) {

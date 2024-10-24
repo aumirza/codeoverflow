@@ -1,9 +1,8 @@
-import React from "react";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { LuBadge } from "react-icons/lu";
 import MDEditor from "@uiw/react-md-editor";
 import Comments from "@/components/Comments";
 import { IAnswer, IQuestion } from "@/types/models";
+import VoteButtons from "./VoteButtons";
 
 function Content({
   data,
@@ -14,15 +13,12 @@ function Content({
 }) {
   return (
     <div className="w-full flex gap-5 mt-5">
-      <div className="">
-        <div className="flex justify-center items-center size-10  rounded-full border-2">
-          <FaChevronUp />
-        </div>
-        <div className="flex justify-center my-2">{data?.votes.total}</div>
-        <div className="flex justify-center items-center size-10 rounded-full  border-2">
-          <FaChevronDown />
-        </div>
-      </div>
+      <VoteButtons
+        onType={type}
+        typeId={data.$id}
+        totalVotes={data.votes.net}
+      />
+
       <div className="flex-1 flex flex-col gap-2">
         <MDEditor.Markdown className="p-5 rounded-lg" source={data?.content} />
         {data?.attachment ? (

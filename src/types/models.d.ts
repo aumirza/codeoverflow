@@ -11,7 +11,7 @@ export interface IVote extends Models.Document {
   type: string;
   typeId: string;
   votedById: string;
-  voteStatus: number;
+  voteStatus: string;
 }
 
 export interface IQuestion extends Models.Document {
