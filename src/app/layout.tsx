@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providors } from "@/components/providors";
 import Header from "@/components/Header";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
           <Header />
           <main className="bg-slate-100 py-10 px-5">{children}</main>
         </Providors>
+        <Toaster />
       </body>
     </html>
   );
