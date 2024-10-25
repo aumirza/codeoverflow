@@ -4,6 +4,8 @@ import "./globals.css";
 import { Providors } from "@/components/providors";
 import Header from "@/components/Header";
 import { Toaster } from "@/components/ui/sonner";
+import { CommandMenu } from "@/components/CommandMenu";
+import Footer from "@/components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,8 +25,10 @@ export default function RootLayout({
         <Providors>
           <Header />
           <main className="bg-slate-100 py-10 px-5">{children}</main>
+          <Toaster />
+          <Footer />
+          <CommandMenu />
         </Providors>
-        <Toaster />
       </body>
     </html>
   );
