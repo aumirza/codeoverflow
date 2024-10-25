@@ -25,8 +25,8 @@ const Nav = () => {
         {user ? (
           <>
             <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-              <Link href="/add-question" passHref legacyBehavior>
-                <NavigationMenuLink>Add Question</NavigationMenuLink>
+              <Link href="/questions" passHref legacyBehavior>
+                <NavigationMenuLink>All questions</NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
 
