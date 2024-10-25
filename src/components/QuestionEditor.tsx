@@ -15,15 +15,19 @@ import MarkdownEditor from "./MarkdownEditor";
 import { useAuthStore } from "@/store/Auth";
 import { useMutation } from "@tanstack/react-query";
 import { useDb } from "@/hooks/usedb";
+import { NUMBER_OF_WORDS } from "@/Constants";
+import { toast } from "sonner";
 
 const QuestionEditor = () => {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const questionSchema = z.object({
     title: z.string().min(1, { message: "Required" }),
-    content: z.string().refine((v) => countWordsInMarkdown(v) > 50, {
-      message: "Atleast 50 words are required.",
-    }),
+    content: z
+      .string()
+      .refine((v) => countWordsInMarkdown(v) >= NUMBER_OF_WORDS, {
+        message: `Atleast ${NUMBER_OF_WORDS} words are required.`,
+      }),
     tags: z
       .array(
         z.object({
@@ -66,17 +70,14 @@ const QuestionEditor = () => {
       content: string;
       authorId: string;
       tags: string[];
-      file: File;
+      file?: File;
     }) => createQuestion(title, content, authorId, tags, file),
     mutationKey: ["addQuestion"],
-    onSuccess: () => {
-      console.log("success");
+    onSuccess: (data) => {
+      toast.success("Question added successfully");
     },
     onError: (error) => {
-      setError("root", {
-        type: "custom",
-        message: error.message,
-      });
+      toast.error(error.message);
     },
   });
 
@@ -90,7 +91,9 @@ const QuestionEditor = () => {
   } = form;
 
   const onSubmit: SubmitHandler<z.infer<typeof questionSchema>> = (values) => {
-    const file = values.attachment[0].file;
+    let file = undefined;
+    if (values.attachment && values.attachment.length !== 0)
+      file = values.attachment[0].file;
     const { title, content } = values;
     const tags = values.tags.map((tag) => tag.text);
     if (!user?.$id) return;
