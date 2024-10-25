@@ -10,6 +10,7 @@ import {
   // FormLabel,
 } from "./ui/form";
 import { countWordsInMarkdown } from "@/utils/markdown";
+import { NUMBER_OF_WORDS } from "@/Constants";
 
 interface IProps {
   control: any;
@@ -32,7 +33,7 @@ const MarkdownEditor: FC<IProps> = ({ control }) => {
             Explain your problem in more detail.
           </span>
           <span className="text-xs text-gray-600">
-            Describe it in atleast 75 words.
+            Describe it in atleast {NUMBER_OF_WORDS} words.
           </span>
         </div>
         <div className="">

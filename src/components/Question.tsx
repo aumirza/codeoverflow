@@ -1,17 +1,16 @@
 "use client";
+
 import Answers from "@/components/Answers";
 import Content from "@/components/Content";
 import { useDb } from "@/hooks/usedb";
 import { timeAgo } from "@/utils/time-ago";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect } from "react";
 
-function Page({ params }: { params: { id: string; slug: string } }) {
-  const id = params.id;
+export default function QuestionPage({ questionId }: { questionId: string }) {
   const { getQuestion } = useDb();
   const { data, error, isFetching } = useQuery({
-    queryKey: ["question", id],
-    queryFn: () => getQuestion(id),
+    queryKey: ["question", questionId],
+    queryFn: () => getQuestion(questionId),
     staleTime: Infinity,
   });
 
@@ -34,5 +33,3 @@ function Page({ params }: { params: { id: string; slug: string } }) {
     </div>
   );
 }
-
-export default Page;

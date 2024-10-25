@@ -1,4 +1,4 @@
-import { account, avatars, databases, storage } from "@/models/client";
+import { avatars, databases, storage } from "@/models/client";
 import {
   db,
   questionAttachmentsBucket,
@@ -7,7 +7,7 @@ import {
 } from "@/config/db";
 import { ID, Query } from "appwrite";
 import { IAnswer, IComment, IQuestion, IVote } from "@/types/models";
-import { toast } from "sonner";
+import { users } from "@/models/server/config";
 
 export const useDb = () => ({
   createQuestion,
@@ -21,9 +21,9 @@ export const useDb = () => ({
 
 const fetchUserDetails = async (userId: string) => {
   try {
-    const user = await account.get();
+    const user = await users.get(userId);
     const avatarImage = avatars.getInitials(user?.name);
-    return { ...user, avatar: avatarImage };
+    return { ...user, avatar: avatarImage.toString() };
   } catch (error) {
     console.error("Error fetching user details:", error);
     return null;
@@ -159,11 +159,39 @@ async function getQuestion(id: string) {
   }
 }
 
-async function getQuestions() {
+async function getQuestions({
+  searchQuery,
+  pageNo,
+  limit,
+}: {
+  searchQuery?: string;
+  pageNo?: number;
+  limit?: number;
+}) {
+  const perPage = limit ?? 10;
+  const page = pageNo ?? 1;
+  const queries = [
+    Query.orderDesc("$createdAt"),
+    Query.offset((page - 1) * perPage),
+    Query.limit(perPage),
+  ];
+  if (searchQuery) {
+    // only search title
+    // queries.push(Query.search("title", searchQuery));
+    // search title and content both
+    // queries.push(
+    //   Query.or([
+    //     Query.search("title", searchQuery),
+    //     Query.search("content", searchQuery),
+    //   ])
+    // );
+  }
+
   try {
     const questions = await databases.listDocuments<IQuestion>(
       db,
-      questionCollection
+      questionCollection,
+      queries
     );
 
     questions.documents = await Promise.all(
@@ -222,10 +250,11 @@ async function createQuestion(
   content: string,
   authorId: string,
   tags: string[],
-  file: File
+  file?: File
 ) {
   try {
-    const attachmentId = await uploadAttachment(file);
+    let attachmentId = "";
+    if (file) attachmentId = await uploadAttachment(file);
     const question = await databases.createDocument(
       db,
       questionCollection,
