@@ -145,7 +145,7 @@ const QuestionEditor = () => {
             <BeamCard>
               <span>Add Tags</span>
               <span className="text-xs text-gray-600">
-                Add up to 5 tags (separated by comma's)
+                Add up to 5 tags (separated by comma&apos;s)
               </span>
               <FormField
                 control={control}
