@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function SearchBox({}: {}) {
-  const [queryParam, setQueryParam] = useState<string>("");
+  const searchParams = useSearchParams();
+  const [queryParam, setQueryParam] = useState<string>(
+    searchParams.get("q") ?? ""
+  );
   const router = useRouter();
 
   const handleSearch = () => {

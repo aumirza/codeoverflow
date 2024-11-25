@@ -6,11 +6,12 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-export default async function QuestionsRoute({
-  searchParams,
-}: {
-  searchParams: { q: string; page: string };
-}) {
+export default async function QuestionsRoute(
+  props: {
+    searchParams: Promise<{ q: string; page: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const { getQuestions } = useDb();
   const queyClient = new QueryClient();
   await queyClient.prefetchQuery({
