@@ -10,55 +10,42 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "./ui/form";
-import { countWordsInMarkdown } from "@/utils/markdown";
 import MarkdownEditor from "./MarkdownEditor";
 import { useAuthStore } from "@/store/Auth";
 import { useMutation } from "@tanstack/react-query";
 import { useDb } from "@/hooks/usedb";
-import { NUMBER_OF_WORDS } from "@/Constants";
 import { toast } from "sonner";
+import { IQuestion } from "@/types/models";
+import { questionSchema } from "@/schemas/questionSchema";
 
-const QuestionEditor = () => {
+const QuestionEditor = ({ question }: { question?: IQuestion }) => {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
-  const questionSchema = z.object({
-    title: z.string().min(1, { message: "Required" }),
-    content: z
-      .string()
-      .refine((v) => countWordsInMarkdown(v) >= NUMBER_OF_WORDS, {
-        message: `Atleast ${NUMBER_OF_WORDS} words are required.`,
-      }),
-    tags: z
-      .array(
-        z.object({
-          id: z.string(),
-          text: z.string(),
-        })
-      )
-      .min(1, { message: "Atleast add 1 tag." }),
-    attachment: z.array(
-      z.object({
-        file: z.instanceof(File),
-        preview: z.string(),
-      })
-    ),
-  });
-
-  const { createQuestion } = useDb();
+  const { createQuestion, updateQuestion } = useDb();
 
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      title: "",
-      content: "",
-      tags: [],
-      attachment: undefined,
+      title: question ? question.title : "",
+      content: question ? question.content : "",
+      tags: question
+        ? question.tags.map((tag) => ({ text: tag, id: tag.toLowerCase() }))
+        : [],
+      attachment:
+        question && question.attachment
+          ? [
+              {
+                file: new File([""], question.attachment),
+                preview: question.attachment,
+              },
+            ]
+          : [],
     },
   });
 
   const { user } = useAuthStore();
 
-  const { mutate: addQuestion } = useMutation({
+  const { mutateAsync: addQuestion } = useMutation({
     mutationFn: ({
       title,
       content,
@@ -81,16 +68,42 @@ const QuestionEditor = () => {
     },
   });
 
+  const { mutateAsync: updateQuestionMutation } = useMutation({
+    mutationKey: ["updateQuestion"],
+    mutationFn: ({
+      id,
+      title,
+      content,
+      tags,
+      file,
+    }: {
+      id: string;
+      title: string;
+      content: string;
+      tags: string[];
+      file?: File;
+    }) =>
+      updateQuestion(id, title, content, tags, question?.attachmentId, file),
+    onSuccess: (data) => {
+      toast.success("Question updated successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message);
+    },
+  });
+
   const {
     control,
     register,
     setError,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors, isSubmitting },
   } = form;
 
-  const onSubmit: SubmitHandler<z.infer<typeof questionSchema>> = (values) => {
+  const onSubmit: SubmitHandler<z.infer<typeof questionSchema>> = async (
+    values
+  ) => {
     let file = undefined;
     if (values.attachment && values.attachment.length !== 0)
       file = values.attachment[0].file;
@@ -98,7 +111,19 @@ const QuestionEditor = () => {
     const tags = values.tags.map((tag) => tag.text);
     if (!user?.$id) return;
     const authorId = user?.$id;
-    addQuestion({ title, content, authorId, tags, file });
+    if (question) {
+      // check if empty file that i created
+      if (file && file.size === 0) file = undefined;
+      await updateQuestionMutation({
+        id: question.$id,
+        title,
+        content,
+        tags,
+        file,
+      });
+    } else {
+      await addQuestion({ title, content, authorId, tags, file });
+    }
   };
 
   return (
@@ -107,7 +132,9 @@ const QuestionEditor = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="flex flex-col gap-5">
             <div className="">
-              <span className="text-3xl font-semibold">Add Question</span>
+              <span className="text-3xl font-semibold">
+                {question ? "Edit" : "Add"} Question
+              </span>
             </div>
             <BeamCard duration={14}>
               <span>Writing a good question.</span>
@@ -182,7 +209,13 @@ const QuestionEditor = () => {
               <span className="text-red-100">{errors.root.message}</span>
             ) : null}
             <div className="">
-              <ShimmerButton>Submit</ShimmerButton>
+              <ShimmerButton disabled={isSubmitting}>
+                {isSubmitting
+                  ? "Loading..."
+                  : question
+                  ? "Update Question"
+                  : "Add Question"}
+              </ShimmerButton>
             </div>
           </div>
         </form>

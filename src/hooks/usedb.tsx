@@ -12,11 +12,13 @@ import { users } from "@/models/server/config";
 export const useDb = () => ({
   createQuestion,
   getQuestions,
-  getQuestion,
+  getQuestionIncluded,
   addNewComment,
   createAnswer,
   createOrUpdateVote,
   isVotedByOnType,
+  getQuestion,
+  updateQuestion,
 });
 
 const fetchUserDetails = async (userId: string) => {
@@ -131,27 +133,36 @@ async function getVotes(type: string, typeId: string) {
 
 async function getQuestion(id: string) {
   try {
-    console.log("fetching question from database");
     const question = await databases.getDocument<IQuestion>(
       db,
       questionCollection,
       id
     );
-    const author = await fetchUserDetails(question.authorId);
-    const votes = await getVotes("question", question.$id);
-    const comments = await getComments("question", question.$id);
-    const answers = await getAnswers(question.$id);
     const attachment =
       question.attachmentId !== ""
         ? await getAttachment(question.attachmentId)
         : null;
+    return { ...question, attachment: attachment };
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function getQuestionIncluded(id: string) {
+  try {
+    const question = await getQuestion(id);
+    const author = await fetchUserDetails(question.authorId);
+    const votes = await getVotes("question", question.$id);
+    const comments = await getComments("question", question.$id);
+    const answers = await getAnswers(question.$id);
+
     return {
       ...question,
       author: author,
       votes: votes,
       comments: comments,
       answers: answers,
-      attachment: attachment,
     };
   } catch (error) {
     console.error(error);
@@ -179,12 +190,12 @@ async function getQuestions({
     // only search title
     // queries.push(Query.search("title", searchQuery));
     // search title and content both
-    // queries.push(
-    //   Query.or([
-    //     Query.search("title", searchQuery),
-    //     Query.search("content", searchQuery),
-    //   ])
-    // );
+    queries.push(
+      Query.or([
+        Query.search("title", searchQuery),
+        Query.search("content", searchQuery),
+      ])
+    );
   }
 
   try {
@@ -238,7 +249,25 @@ async function getAttachment(attachmentId: string) {
       questionAttachmentsBucket,
       attachmentId
     );
-    return file;
+    return file.toString();
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function updateAttachment(attachmentId: string, file: File) {
+  try {
+    //delete old attachment
+    await storage.deleteFile(questionAttachmentsBucket, attachmentId);
+    //upload new attachment
+    const storageRes = await storage.createFile(
+      questionAttachmentsBucket,
+      ID.unique(),
+      file
+    );
+    if (storageRes.$id === undefined) throw new Error("Storage error");
+    return storageRes.$id;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -266,6 +295,42 @@ async function createQuestion(
         attachmentId: attachmentId,
         authorId: authorId,
       }
+    );
+    return question;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+async function updateQuestion(
+  id: string,
+  title: string,
+  content: string,
+  tags: string[],
+  attachmentId?: string,
+  file?: File
+) {
+  try {
+    const data = {
+      title: title,
+      content: content,
+      tags: tags,
+    } as {
+      title: string;
+      content: string;
+      tags: string[];
+      attachmentId?: string;
+    };
+
+    if (file && attachmentId) {
+      data.attachmentId = await updateAttachment(attachmentId, file);
+    }
+
+    const question = await databases.updateDocument(
+      db,
+      questionCollection,
+      id,
+      data
     );
     return question;
   } catch (error) {

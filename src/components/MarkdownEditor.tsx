@@ -1,29 +1,30 @@
-import React, { FC } from "react";
+import React, { useEffect, useState } from "react";
 import { BeamCard } from "./magicui/beam-card";
 import MDEditor from "@uiw/react-md-editor";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-  // FormDescription,
-  // FormLabel,
-} from "./ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "./ui/form";
 import { countWordsInMarkdown } from "@/utils/markdown";
 import { NUMBER_OF_WORDS } from "@/Constants";
+import { Control } from "react-hook-form";
+import { questionSchema } from "@/schemas/questionSchema";
+import { z } from "zod";
 
-interface IProps {
-  control: any;
-}
-
-const MarkdownEditor: FC<IProps> = ({ control }) => {
-  const [words, setWords] = React.useState(0);
+function MarkdownEditor({
+  control,
+}: {
+  control: Control<z.infer<typeof questionSchema>>;
+}) {
+  const [words, setWords] = useState(0);
 
   const handleCountWords = (v: string | undefined) => {
     if (!v) return setWords(0);
     const wordCount = countWordsInMarkdown(v);
     setWords(wordCount);
   };
+
+  useEffect(() => {
+    handleCountWords(control._defaultValues.content);
+  }, []);
+
   return (
     <BeamCard duration={16}>
       <div className="flex justify-between items-center">
@@ -64,6 +65,6 @@ const MarkdownEditor: FC<IProps> = ({ control }) => {
       />
     </BeamCard>
   );
-};
+}
 
 export default MarkdownEditor;

@@ -6,17 +6,16 @@ import {
   QueryClient,
 } from "@tanstack/react-query";
 
-export default async function QuestionRoute({
-  params,
-}: {
-  params: { id: string; slug: string };
+export default async function QuestionRoute(props: {
+  params: Promise<{ id: string; slug: string }>;
 }) {
+  const params = await props.params;
   const id = params.id;
-  const { getQuestion } = useDb();
+  const { getQuestionIncluded } = useDb();
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
     queryKey: ["question", id],
-    queryFn: () => getQuestion(id),
+    queryFn: () => getQuestionIncluded(id),
   });
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
