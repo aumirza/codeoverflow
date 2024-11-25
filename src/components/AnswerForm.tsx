@@ -50,7 +50,7 @@ function AnswerForm({
   });
 
   const onSubmit: SubmitHandler<any> = (values: any) => {
-    if (!user) return;
+    if (!user) return alert("Please login to answer");
     console.log(values);
     const authorId = user?.$id;
     addAnswer({ content: values.content, authorId, questionId });

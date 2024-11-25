@@ -88,8 +88,8 @@ function VoteButtons({
 
   const handleVoteChange = (voteType: "up" | "down") => {
     if (!user) {
-      alert("Please login to vote");
-      throw new Error("User not logged in");
+      return alert("Please login to vote");
+      // throw new Error("User not logged in");
     }
     if (!voteStatus) return;
     mutate(voteType);

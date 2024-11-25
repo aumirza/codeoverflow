@@ -4,6 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { BeamCard } from "./magicui/beam-card";
 import { timeAgo } from "@/utils/time-ago";
+import Image from "next/image";
 
 export default function QuestionCard({ question }: { question: IQuestion }) {
   return (
@@ -32,7 +33,9 @@ export default function QuestionCard({ question }: { question: IQuestion }) {
               </div>
               <div className="flex items-center gap-1">
                 {/* profile pic */}
-                <img
+                <Image
+                  height={50}
+                  width={50}
                   className="inline-block h-6 w-6 rounded-full ring-2 ring-white"
                   src={question.author?.avatar.toString()}
                   alt=""

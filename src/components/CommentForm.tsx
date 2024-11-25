@@ -49,18 +49,19 @@ function CommentForm({
         ...data,
         author: user,
       });
+      form.reset();
     },
   });
 
   const onSubmit: SubmitHandler<{ comment: string }> = (values) => {
-    if (!typeId || !onType || !user) return;
+    if (!typeId || !onType) return;
+    if (!user) return alert("Please login to add comment");
     addComment({
       comment: values.comment,
       type: onType,
       typeId,
       authorId: user.$id,
     });
-    // form.reset();
   };
 
   return (
