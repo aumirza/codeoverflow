@@ -16,6 +16,10 @@ import {
   Form,
 } from "@/components/ui/form";
 import { useMutation } from "@tanstack/react-query";
+import { addSpaces, toTitleCase } from "@/utils/case";
+import PasswordInput from "@/components/password-input";
+import Link from "next/link";
+import { FaCircleNotch } from "react-icons/fa";
 
 const registerFormSchema = z
   .object({
@@ -37,7 +41,7 @@ const keys = Object.keys(registerFormSchema._def.schema.shape) as Array<
 const RegisterPage = () => {
   const { createAccount } = useAuthStore();
 
-  const { mutate: handleRegister } = useMutation({
+  const { mutateAsync: handleRegister } = useMutation({
     mutationFn: ({
       name,
       email,
@@ -47,8 +51,11 @@ const RegisterPage = () => {
       email: string;
       password: string;
     }) => createAccount(name, email, password),
+    onSuccess(data) {
+      // console.log(data);
+    },
     onError(error) {
-      console.log(error);
+      // console.error(error);
       setError("root", { message: error.message });
     },
   });
@@ -71,18 +78,18 @@ const RegisterPage = () => {
     formState: { errors, isSubmitting },
   } = form;
 
-  const onSubmit: SubmitHandler<z.infer<typeof registerFormSchema>> = (
+  const onSubmit: SubmitHandler<z.infer<typeof registerFormSchema>> = async (
     values
   ) => {
     const { email, password } = values;
     const name = values.firstName + " " + values.lastName;
-    handleRegister({ name, email, password });
+    await handleRegister({ name, email, password });
   };
 
   return (
-    <div className="flex flex-col justify-center">
+    <div className="w-full flex flex-col justify-center">
       <div className="flex justify-center mb-5">
-        <span className="text-3xl text-white">Register</span>
+        <span className="text-3xl">Register</span>
       </div>
 
       <Form {...form}>
@@ -95,11 +102,18 @@ const RegisterPage = () => {
                 name={key}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">
-                      {field.name.toUpperCase()}
+                    <FormLabel className="">
+                      {addSpaces(field.name).toUpperCase()}
                     </FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      {key.toLowerCase().includes("password") ? (
+                        <PasswordInput
+                          placeholder={toTitleCase(key)}
+                          {...field}
+                        />
+                      ) : (
+                        <Input placeholder={toTitleCase(key)} {...field} />
+                      )}
                     </FormControl>
                     {/* <FormDescription>
                       This is your public display name.
@@ -111,19 +125,34 @@ const RegisterPage = () => {
             ))}
           </div>
 
-          {errors.root ? (
+          {/* {errors.root ? (
             <span className="text-red-100">{errors.root.message}</span>
-          ) : null}
+          ) : null} */}
 
           <Button
             type="submit"
-            className="mt-2"
+            className="mt-2 w-full bg-primary text-white border-2 border-primary hover:bg-accent transition-none ease-in-out"
             variant={"outline"}
             disabled={Boolean(isSubmitting)}
           >
-            {isSubmitting ? "Loading..." : "Register"}
+            {isSubmitting ? (
+              <>
+                <FaCircleNotch className="animate-spin" />
+                Registering...
+              </>
+            ) : (
+              <span className="font-semibold group-hover:animate-pulse">
+                Register
+              </span>
+            )}
           </Button>
         </form>
+        <div className="mt-2">
+          <span className="">Already have an account? </span>
+          <Link href="/login" className="underline -white ml-1">
+            login
+          </Link>
+        </div>
       </Form>
     </div>
   );

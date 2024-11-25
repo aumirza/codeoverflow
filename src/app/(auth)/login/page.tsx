@@ -17,11 +17,14 @@ import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/Auth";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { toTitleCase } from "@/utils/case";
+import { FaCircleNotch } from "react-icons/fa";
+import Link from "next/link";
+import PasswordInput from "@/components/password-input";
 
 const formSchema = z.object({
-  email: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
+  email: z.string().email({ message: "Invalid email address." }),
   password: z.string().min(8, {
     message: "Password must be at least 8 characters.",
   }),
@@ -35,19 +38,23 @@ function LoginPage() {
   const { login } = useAuthStore();
   const router = useRouter();
 
-  const { mutate: handleLogin } = useMutation({
+  const { mutateAsync: handleLogin } = useMutation({
+    mutationKey: ["login"],
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       login(email, password),
-    mutationKey: ["login"],
-    onError(error, variables, context) {
-      setError("root", {
-        type: "custom",
-        message: error.message,
-      });
+    onMutate() {
+      toast.loading("Logging in...");
     },
-    onSuccess(data, variables, context) {
-      console.log(data);
+    onSuccess() {
+      toast.dismiss();
+      toast.success("Logged in successfully");
+      form.reset();
       router.replace("/");
+    },
+    onError(error) {
+      toast.dismiss();
+      toast.error(error.message);
+      setError("root", { message: error.message });
     },
   });
 
@@ -63,23 +70,23 @@ function LoginPage() {
     control,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { isSubmitting },
   } = form;
 
   const onSubmit: SubmitHandler<z.infer<typeof formSchema>> = async (
     values
   ) => {
-    // const { email, password } = values;
-    handleLogin(values);
+    const { email, password } = values;
+    await handleLogin({ email, password });
   };
 
   return (
-    <div className="flex flex-col justify-center">
+    <div className="w-full flex flex-col justify-center">
       <div className="flex justify-center mb-5">
-        <span className="text-3xl text-white">Login</span>
+        <span className="text-3xl  font-bold">Login</span>
       </div>
       <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
           {keys.map((key) => (
             <FormField
               control={control}
@@ -87,27 +94,51 @@ function LoginPage() {
               name={key}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">
-                    {field.name.toUpperCase()}
-                  </FormLabel>
+                  <FormLabel className="">{field.name.toUpperCase()}</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    {key.includes("password") ? (
+                      <PasswordInput
+                        placeholder={toTitleCase(key)}
+                        {...field}
+                      />
+                    ) : (
+                      <Input placeholder={toTitleCase(key)} {...field} />
+                    )}
                   </FormControl>
                   {/* <FormDescription>
                       This is your public display name.
                     </FormDescription> */}
-                  <FormMessage className="text-red-100" />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
           ))}
-          {errors.root ? (
+          {/* {errors.root ? (
             <span className="text-red-100">{errors.root.message}</span>
-          ) : null}
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Loading..." : "Login"}
+          ) : null} */}
+          <Button
+            className="group w-full text-white hover:bg-accent hover:text-primary border-primary border-2 mt-5 transition-all ease-in-out"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <FaCircleNotch className="animate-spin" />
+                verifying...
+              </>
+            ) : (
+              <span className="font-semibold group-hover:animate-pulse">
+                Login
+              </span>
+            )}
           </Button>
         </form>
+        <div className="mt-2">
+          <span className="">Don&apos;t have an account?</span>
+          <Link href="/register" className="underline -white ml-1">
+            Register
+          </Link>
+        </div>
       </Form>
     </div>
   );

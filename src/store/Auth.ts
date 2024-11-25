@@ -67,10 +67,7 @@ export const useAuthStore = create<IState & IAction>()(
           set({ session, user, jwt });
           return { success: true, user };
         } catch (error) {
-          return Promise.reject({
-            success: false,
-            error: error as AppwriteException,
-          });
+          return Promise.reject(error as AppwriteException);
         }
       },
 

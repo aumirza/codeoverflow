@@ -18,18 +18,20 @@ import {
 import { useAuthStore } from "@/store/Auth";
 
 const Nav = () => {
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
+  const handleLogout = () => {
+    logout();
+  };
   return (
     <NavigationMenu>
       <NavigationMenuList>
+        <NavigationMenuItem className={navigationMenuTriggerStyle()}>
+          <Link href="/questions" passHref legacyBehavior>
+            <NavigationMenuLink>All questions</NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
         {user ? (
           <>
-            <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-              <Link href="/questions" passHref legacyBehavior>
-                <NavigationMenuLink>All questions</NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
             <NavigationMenuItem className={navigationMenuTriggerStyle()}>
               <NavigationMenuTrigger>Profile</NavigationMenuTrigger>
               <NavigationMenuContent className="p-5 flex flex-col gap-2">
@@ -48,33 +50,19 @@ const Nav = () => {
                 <Link href="/Profile" passHref legacyBehavior>
                   <NavigationMenuLink>Profile</NavigationMenuLink>
                 </Link>
-                <Link href="/logout" passHref legacyBehavior>
-                  <NavigationMenuLink>Logout</NavigationMenuLink>
-                </Link>
+                <NavigationMenuLink onClick={handleLogout}>
+                  Logout
+                </NavigationMenuLink>
               </NavigationMenuContent>
             </NavigationMenuItem>
           </>
         ) : (
-          <>
-            <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-              <Link href="/register" passHref legacyBehavior>
-                <NavigationMenuLink>Register</NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-              <Link href="/login" passHref legacyBehavior>
-                <NavigationMenuLink>Login</NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-          </>
+          <NavigationMenuItem className={navigationMenuTriggerStyle()}>
+            <Link href="/login" passHref legacyBehavior>
+              <NavigationMenuLink>Login</NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
         )}
-
-        {/* <NavigationMenuItem>
-          <NavigationMenuTrigger>Item One</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <NavigationMenuLink>Link</NavigationMenuLink>
-          </NavigationMenuContent>
-        </NavigationMenuItem> */}
       </NavigationMenuList>
     </NavigationMenu>
   );
