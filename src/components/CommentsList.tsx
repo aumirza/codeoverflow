@@ -1,23 +1,27 @@
 import { cn } from "@/lib/utils";
 import { IComment } from "@/types/models";
-import { timeAgo } from "@/utils/time-ago";
-import React from "react";
+import Comment from "./Comment";
 
-function CommentsList({ comments }: { comments: IComment[] }) {
+function CommentsList({
+  comments,
+  setComments,
+}: {
+  comments: IComment[];
+  setComments: (comment: IComment[]) => void;
+}) {
+  const onDelete = (commentId: string) => {
+    setComments(comments.filter((comment) => comment.$id !== commentId));
+  };
+
   return (
     <div className="pl-5">
       {comments.length > 0 ? (
         comments.map((comment, i) => (
           <div
-            className={cn(
-              "flex border-b-2 border-gray-200 pb-1 ",
-              i == 0 ? "border-t-2" : ""
-            )}
             key={comment.$id}
+            className={cn(" ", i == 0 ? "border-t-2" : "")}
           >
-            <span>{comment.content} - </span>
-            <span className="text-primary mr-5">{comment.author.name}</span>
-            <span>{timeAgo(comment.$createdAt)}</span>
+            <Comment comment={comment} onDelete={onDelete} />
           </div>
         ))
       ) : (

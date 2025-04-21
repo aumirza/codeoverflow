@@ -19,7 +19,7 @@ function Comments({
   };
   return (
     <div className="flex flex-col gap-1">
-      <CommentsList comments={comments} />
+      <CommentsList comments={comments} setComments={setComments} />
       <CommentForm onType={onType} typeId={typeId} onAdd={handleAdd} />
     </div>
   );
