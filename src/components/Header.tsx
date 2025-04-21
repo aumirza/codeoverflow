@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
-import React from "react";
+import React, { useMemo } from "react";
 import SparklesText from "./magicui/sparkles-text";
-import ShimmerButton from "./magicui/shimmer-button";
+import { ShimmerButton } from "./magicui/shimmer-button";
 
 import {
   NavigationMenu,
@@ -16,9 +16,16 @@ import {
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
 import { useAuthStore } from "@/store/Auth";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { getInitials } from "@/utils/nameUtils";
 
 const Nav = () => {
   const { user, logout } = useAuthStore();
+
+  const initials = useMemo(
+    () => getInitials(user?.name!) || "AM",
+    [user?.name]
+  );
   const handleLogout = () => {
     logout();
   };
@@ -26,7 +33,7 @@ const Nav = () => {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-          <Link href="/questions" passHref legacyBehavior>
+          <Link href="/questions" legacyBehavior passHref>
             <NavigationMenuLink>All questions</NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -35,20 +42,17 @@ const Nav = () => {
             <NavigationMenuItem className={navigationMenuTriggerStyle()}>
               <NavigationMenuTrigger>Profile</NavigationMenuTrigger>
               <NavigationMenuContent className="p-5 flex flex-col gap-2">
-                <div className="flex pb-2 border-b-2">
-                  <div className="">
-                    <div className="w-10 h-10 rounded-full bg-gray-500 mr-2">
-                      {/* <img
-                      src={user?.}
-                      alt="profile"
-                      className="w-full h-full rounded-full"
-                    /> */}
-                    </div>
-                  </div>
+                <div className="flex pb-2 border-b-2 gap-1 ">
+                  <Avatar className="size-10">
+                    {/* <AvatarImage src={user.avatar} /> */}
+                    <AvatarFallback>{initials}</AvatarFallback>
+                  </Avatar>
                   <span className="text-sm">{user.name}</span>
                 </div>
-                <Link href="/Profile" passHref legacyBehavior>
-                  <NavigationMenuLink>Profile</NavigationMenuLink>
+                <Link href="/Profile" legacyBehavior passHref>
+                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                    Profile
+                  </NavigationMenuLink>
                 </Link>
                 <NavigationMenuLink onClick={handleLogout}>
                   Logout
@@ -58,7 +62,7 @@ const Nav = () => {
           </>
         ) : (
           <NavigationMenuItem className={navigationMenuTriggerStyle()}>
-            <Link href="/login" passHref legacyBehavior>
+            <Link href="/login" legacyBehavior passHref>
               <NavigationMenuLink>Login</NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
