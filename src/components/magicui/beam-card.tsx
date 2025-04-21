@@ -29,7 +29,7 @@ export const BeamCard: FC<PropsWithChildren<BeamCardProps>> = ({
     >
       <div className={cn("flex flex-col", className)}>{children}</div>
       <BorderBeam
-        borderWidth={2}
+        // borderWidth={2}
         size={beamSize}
         duration={duration}
         delay={delay}
