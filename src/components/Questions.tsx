@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import SearchBox from "./SearchBox";
 import QuestionList from "./QuestionList";
 import { useSearchParams } from "next/navigation";
-import ShimmerButton from "./magicui/shimmer-button";
+import { ShimmerButton } from "./magicui/shimmer-button";
 import Link from "next/link";
 import QuestionsPagination from "./QuestionsPagination";
 

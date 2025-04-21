@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Input } from "./ui/input";
-import ShimmerButton from "./magicui/shimmer-button";
+import { ShimmerButton } from "./magicui/shimmer-button";
 import { BeamCard } from "./magicui/beam-card";
 import { TagInput, Tag } from "emblor";
 import { ImageInput } from "./ImageInput";
@@ -17,11 +17,15 @@ import { useDb } from "@/hooks/usedb";
 import { toast } from "sonner";
 import { IQuestion } from "@/types/models";
 import { questionSchema } from "@/schemas/questionSchema";
+import { useRouter } from "next/navigation";
+import { slugify } from "@/utils/slugify";
+import { Button } from "./ui/button";
 
 const QuestionEditor = ({ question }: { question?: IQuestion }) => {
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   const { createQuestion, updateQuestion } = useDb();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof questionSchema>>({
     resolver: zodResolver(questionSchema),
@@ -59,9 +63,13 @@ const QuestionEditor = ({ question }: { question?: IQuestion }) => {
       tags: string[];
       file?: File;
     }) => createQuestion(title, content, authorId, tags, file),
+    onMutate: (variables) => {
+      console.log(variables);
+    },
     mutationKey: ["addQuestion"],
     onSuccess: (data) => {
       toast.success("Question added successfully");
+      router.push("/questions/" + data?.$id + slugify(data?.title as string));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -86,6 +94,7 @@ const QuestionEditor = ({ question }: { question?: IQuestion }) => {
       updateQuestion(id, title, content, tags, question?.attachmentId, file),
     onSuccess: (data) => {
       toast.success("Question updated successfully");
+      // router.push("/questions/" + data?.$id + slugify(data?.title as string));
     },
     onError: (error) => {
       toast.error(error.message);
@@ -112,6 +121,7 @@ const QuestionEditor = ({ question }: { question?: IQuestion }) => {
     if (!user?.$id) return;
     const authorId = user?.$id;
     if (question) {
+      console.log(values);
       // check if empty file that i created
       if (file && file.size === 0) file = undefined;
       await updateQuestionMutation({
@@ -208,10 +218,20 @@ const QuestionEditor = ({ question }: { question?: IQuestion }) => {
             {errors.root ? (
               <span className="text-red-100">{errors.root.message}</span>
             ) : null}
-            <div className="">
+            <div className="flex gap-5 justify-center items-center">
+              <Button
+                variant="outline"
+                className="rounded-xl"
+                type="button"
+                onClick={() => router.back()}
+              >
+                Cancel
+              </Button>
               <ShimmerButton disabled={isSubmitting}>
                 {isSubmitting
-                  ? "Loading..."
+                  ? question
+                    ? "Updating..."
+                    : "Adding....."
                   : question
                   ? "Update Question"
                   : "Add Question"}
