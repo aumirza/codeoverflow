@@ -14,6 +14,8 @@ export const useDb = () => ({
   getQuestions,
   getQuestionIncluded,
   addNewComment,
+  updateComment,
+  deleteComment,
   createAnswer,
   createOrUpdateVote,
   isVotedByOnType,
@@ -98,6 +100,37 @@ async function addNewComment(
       }
     );
     return newComment;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function updateComment(content: string, commentId: IComment["$id"]) {
+  try {
+    const updatedComment = await databases.updateDocument<IComment>(
+      db,
+      "comments",
+      commentId,
+      {
+        content: content,
+      }
+    );
+    return updatedComment;
+  } catch (error) {
+    console.error(error);
+    return Promise.reject(error);
+  }
+}
+
+async function deleteComment(commentId: string) {
+  try {
+    const deletedComment = await databases.deleteDocument(
+      db,
+      "comments",
+      commentId
+    );
+    return deletedComment;
   } catch (error) {
     console.error(error);
     return Promise.reject(error);
@@ -322,8 +355,17 @@ async function updateQuestion(
       attachmentId?: string;
     };
 
-    if (file && attachmentId) {
-      data.attachmentId = await updateAttachment(attachmentId, file);
+    if (file) {
+      if (!attachmentId || attachmentId === "") {
+        data.attachmentId = await uploadAttachment(file);
+      } else {
+        data.attachmentId = await updateAttachment(attachmentId, file);
+      }
+    } else {
+      if (attachmentId && attachmentId !== "") {
+        await storage.deleteFile(questionAttachmentsBucket, attachmentId);
+        data.attachmentId = "";
+      }
     }
 
     const question = await databases.updateDocument(
