@@ -3,6 +3,7 @@ import MDEditor from "@uiw/react-md-editor";
 import Comments from "@/components/Comments";
 import { IAnswer, IQuestion } from "@/types/models";
 import VoteButtons from "./VoteButtons";
+import Image from "next/image";
 
 function Content({
   data,
@@ -23,7 +24,12 @@ function Content({
         <MDEditor.Markdown className="p-5 rounded-lg" source={data?.content} />
         {data?.attachment ? (
           <div className="">
-            <img src={data?.attachment.toString()} alt="" />
+            <Image
+              height={400}
+              width={400}
+              src={data?.attachment.toString()}
+              alt=""
+            />
           </div>
         ) : (
           ""
@@ -44,7 +50,9 @@ function Content({
             )}
           </div>
           <div className="flex gap-2">
-            <img
+            <Image
+              height={100}
+              width={100}
               className="size-7 rounded-full"
               src={data.author.avatar}
               alt=""
