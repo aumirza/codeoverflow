@@ -22,6 +22,7 @@ import { toTitleCase } from "@/utils/case";
 import { FaCircleNotch } from "react-icons/fa";
 import Link from "next/link";
 import PasswordInput from "@/components/password-input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -81,66 +82,71 @@ function LoginPage() {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center">
-      <div className="flex justify-center mb-5">
-        <span className="text-3xl  font-bold">Login</span>
-      </div>
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-          {keys.map((key) => (
-            <FormField
-              control={control}
-              key={key}
-              name={key}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="">{field.name.toUpperCase()}</FormLabel>
-                  <FormControl>
-                    {key.includes("password") ? (
-                      <PasswordInput
-                        placeholder={toTitleCase(key)}
-                        {...field}
-                      />
-                    ) : (
-                      <Input placeholder={toTitleCase(key)} {...field} />
-                    )}
-                  </FormControl>
-                  {/* <FormDescription>
+    <Card className="bg-card w-96 p-10">
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold text-center">Login</CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+            {keys.map((key) => (
+              <FormField
+                control={control}
+                key={key}
+                name={key}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="">
+                      {field.name.toUpperCase()}
+                    </FormLabel>
+                    <FormControl>
+                      {key.includes("password") ? (
+                        <PasswordInput
+                          placeholder={toTitleCase(key)}
+                          {...field}
+                        />
+                      ) : (
+                        <Input placeholder={toTitleCase(key)} {...field} />
+                      )}
+                    </FormControl>
+                    {/* <FormDescription>
                       This is your public display name.
                     </FormDescription> */}
-                  <FormMessage className="text-red-500" />
-                </FormItem>
-              )}
-            />
-          ))}
-          {/* {errors.root ? (
+                    <FormMessage className="text-red-500" />
+                  </FormItem>
+                )}
+              />
+            ))}
+            {/* {errors.root ? (
             <span className="text-red-100">{errors.root.message}</span>
           ) : null} */}
-          <Button
-            className="group w-full text-white hover:bg-accent hover:text-primary border-primary border-2 mt-5 transition-all ease-in-out"
-            type="submit"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <>
-                <FaCircleNotch className="animate-spin" />
-                verifying...
-              </>
-            ) : (
-              <span className="font-semibold group-hover:animate-pulse">
-                Login
-              </span>
-            )}
-          </Button>
-        </form>
-        <div className="mt-2">
-          <span className="">Don&apos;t have an account?</span>
-          <Link href="/register" className="underline -white ml-1">
-            Register
-          </Link>
-        </div>
-      </Form>
-    </div>
+            <Button
+              className="group w-full text-white hover:bg-accent hover:text-primary border-primary border-2 mt-5 transition-all ease-in-out"
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <FaCircleNotch className="animate-spin" />
+                  verifying...
+                </>
+              ) : (
+                <span className="font-semibold group-hover:animate-pulse">
+                  Login
+                </span>
+              )}
+            </Button>
+          </form>
+          <div className="mt-2">
+            <span className="">Don&apos;t have an account?</span>
+            <Link href="/register" className="underline -white ml-1">
+              Register
+            </Link>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }
 

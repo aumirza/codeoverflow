@@ -20,6 +20,7 @@ import { addSpaces, toTitleCase } from "@/utils/case";
 import PasswordInput from "@/components/password-input";
 import Link from "next/link";
 import { FaCircleNotch } from "react-icons/fa";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const registerFormSchema = z
   .object({
@@ -87,74 +88,78 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col justify-center">
-      <div className="flex justify-center mb-5">
-        <span className="text-3xl">Register</span>
-      </div>
+    <Card className="bg-card w-96 p-10">
+      <CardHeader>
+        <CardTitle className="text-3xl font-bold text-center">
+          Register
+        </CardTitle>
+      </CardHeader>
 
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col gap-2">
-            {keys.map((key) => (
-              <FormField
-                key={key}
-                control={control}
-                name={key}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="">
-                      {addSpaces(field.name).toUpperCase()}
-                    </FormLabel>
-                    <FormControl>
-                      {key.toLowerCase().includes("password") ? (
-                        <PasswordInput
-                          placeholder={toTitleCase(key)}
-                          {...field}
-                        />
-                      ) : (
-                        <Input placeholder={toTitleCase(key)} {...field} />
-                      )}
-                    </FormControl>
-                    {/* <FormDescription>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-2">
+              {keys.map((key) => (
+                <FormField
+                  key={key}
+                  control={control}
+                  name={key}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="">
+                        {addSpaces(field.name).toUpperCase()}
+                      </FormLabel>
+                      <FormControl>
+                        {key.toLowerCase().includes("password") ? (
+                          <PasswordInput
+                            placeholder={toTitleCase(key)}
+                            {...field}
+                          />
+                        ) : (
+                          <Input placeholder={toTitleCase(key)} {...field} />
+                        )}
+                      </FormControl>
+                      {/* <FormDescription>
                       This is your public display name.
                     </FormDescription> */}
-                    <FormMessage className="text-red-100" />
-                  </FormItem>
-                )}
-              />
-            ))}
-          </div>
+                      <FormMessage className="text-red-100" />
+                    </FormItem>
+                  )}
+                />
+              ))}
+            </div>
 
-          {/* {errors.root ? (
+            {/* {errors.root ? (
             <span className="text-red-100">{errors.root.message}</span>
           ) : null} */}
 
-          <Button
-            type="submit"
-            className="mt-2 w-full bg-primary text-white border-2 border-primary hover:bg-accent transition-none ease-in-out"
-            variant={"outline"}
-            disabled={Boolean(isSubmitting)}
-          >
-            {isSubmitting ? (
-              <>
-                <FaCircleNotch className="animate-spin" />
-                Registering...
-              </>
-            ) : (
-              <span className="font-semibold group-hover:animate-pulse">
-                Register
-              </span>
-            )}
-          </Button>
-        </form>
-        <div className="mt-2">
-          <span className="">Already have an account? </span>
-          <Link href="/login" className="underline -white ml-1">
-            login
-          </Link>
-        </div>
-      </Form>
-    </div>
+            <Button
+              type="submit"
+              className="mt-2 w-full bg-primary text-white border-2 border-primary hover:bg-accent transition-none ease-in-out"
+              variant={"outline"}
+              disabled={Boolean(isSubmitting)}
+            >
+              {isSubmitting ? (
+                <>
+                  <FaCircleNotch className="animate-spin" />
+                  Registering...
+                </>
+              ) : (
+                <span className="font-semibold group-hover:animate-pulse">
+                  Register
+                </span>
+              )}
+            </Button>
+          </form>
+          <div className="mt-2">
+            <span className="">Already have an account? </span>
+            <Link href="/login" className="underline -white ml-1">
+              login
+            </Link>
+          </div>
+        </Form>
+      </CardContent>
+    </Card>
   );
 };
 
