@@ -33,9 +33,11 @@ interface IAction {
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<IState & IAction>()(
+type IStore = IState & IAction;
+
+export const useAuthStore = create<IStore>()(
   persist(
-    immer((set) => ({
+    immer((set, get) => ({
       session: null,
       user: null,
       jwt: null,
